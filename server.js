@@ -227,23 +227,21 @@ app.get('/', (req, res) => {
 /* ================= PRODUCTS ================= */
 
 app.get('/api/products', async (req, res) => {
-
     try {
-
         const products = await Product.find();
+
+        console.log("Products found:", products.length);
 
         res.status(200).json(products);
 
     } catch (err) {
 
+        console.error("PRODUCT ERROR:", err);
+
         res.status(500).json({
-
-            error: "Data laane mein error aaya"
-
+            error: err.message
         });
-
     }
-
 });
 
 app.get('/api/products/:id', async (req, res) => {
