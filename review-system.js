@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (!name || !message) return;
 
-            await fetch('http://localhost:3000/api/reviews', {
+            await fetch('http://strength-physio-server-1.onrender.com/api/reviews', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, rating, message })
