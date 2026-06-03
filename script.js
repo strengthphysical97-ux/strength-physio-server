@@ -13,7 +13,7 @@ window.allCategories = allCategories;
 
 async function fetchAndInitialize() {
     try {
-        const response = await fetch('http://localhost:3000/api/products');
+       const response = await fetch('https://strength-physio-server-1.onrender.com/api/products');
         const data = await response.json();
         
         allCategories.rehab = data.filter(p => p.category && p.category.toLowerCase() === 'rehab');
