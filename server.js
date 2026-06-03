@@ -152,7 +152,7 @@ const ProductSchema = new mongoose.Schema({
 
 });
 
-const Product = mongoose.model('Product', ProductSchema);
+const Product = mongoose.model('product', ProductSchema);
 
 const ReviewSchema = new mongoose.Schema({
 
