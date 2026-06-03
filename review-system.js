@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!track) return;
 
         try {
-            const res = await fetch('http://localhost:3000/api/reviews');
+            const res = await fetch('http://strength-physio-server-1.onrender.com/api/reviews');
             const reviews = await res.json();
             track.innerHTML = reviews.map(r => `
                 <div class="review-card">
