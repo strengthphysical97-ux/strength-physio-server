@@ -34,12 +34,6 @@ async function fetchAndInitialize() {
 
 // Page load hote hi data fetch karo
 document.addEventListener('DOMContentLoaded', fetchAndInitialize);
- console.time("products");
-
-const response = await fetch('https://strength-physio-server-1.onrender.com/api/products');
-const data = await response.json();
-
-console.timeEnd("products");
-
+ 
 
 
