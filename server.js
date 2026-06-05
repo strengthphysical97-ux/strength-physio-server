@@ -2,6 +2,7 @@ require('dotenv').config();
 // console.log(process.env.MONGO_URL);
 // mongoose.connect(process.env.MONGO_URL);
 
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -53,18 +54,39 @@ const ADMIN_PASSWORD = "StrongAdmin123";
 
 function verifyAdmin(req, res, next) {
 
-    const adminPassword = req.headers["admin-password"];
+    const authHeader =
+        req.headers.authorization;
 
-    if (adminPassword !== ADMIN_PASSWORD) {
+    if (!authHeader) {
 
         return res.status(401).json({
             success: false,
-            message: "Unauthorized"
+            message: "Login Required"
         });
 
     }
 
-    next();
+    const token =
+        authHeader.split(" ")[1];
+
+    try {
+
+        jwt.verify(
+            token,
+            process.env.JWT_SECRET
+        );
+
+        next();
+
+    } catch (err) {
+
+        return res.status(401).json({
+            success: false,
+            message: "Invalid Token"
+        });
+
+    }
+
 }
 
 
@@ -214,6 +236,12 @@ const ProductReviewSchema = new mongoose.Schema({
 });
 
 const ProductReview = mongoose.model('ProductReview', ProductReviewSchema);
+const AdminSchema = new mongoose.Schema({
+    username: String,
+    password: String
+});
+
+const Admin = mongoose.model('Admin', AdminSchema);
 
 const UserSchema = new mongoose.Schema({
 
@@ -413,30 +441,53 @@ app.get('/api/product-reviews/:productId', async (req, res) => {
 
 /* ================= ADMIN LOGIN ================= */
 
-app.post('/api/admin/login', (req, res) => {
+app.post('/api/admin/login', async (req, res) => {
 
-    const { username, password } = req.body;
+    try {
 
-    if (
+        const { username, password } = req.body;
 
-        username === "admin" &&
+        const admin = await Admin.findOne({ username });
 
-        password === "physio123"
+        if (!admin) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid Username"
+            });
+        }
 
-    ) {
+        const isMatch = await bcrypt.compare(
+            password,
+            admin.password
+        );
 
-        res.status(200).json({
+        if (!isMatch) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid Password"
+            });
+        }
 
-            success: true
+        const token = jwt.sign(
+            {
+                adminId: admin._id
+            },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: '8h'
+            }
+        );
 
+        res.json({
+            success: true,
+            token
         });
 
-    } else {
+    } catch (err) {
 
-        res.status(401).json({
-
-            success: false
-
+        res.status(500).json({
+            success: false,
+            error: err.message
         });
 
     }
