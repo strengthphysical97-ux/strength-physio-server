@@ -455,11 +455,9 @@ app.get(
         const orders = await Order.find();
 
         res.json({
-
+            success: true,
             products,
-
             orders
-
         });
 
     });
@@ -567,20 +565,16 @@ app.put(
 /* ================= DELETE PRODUCT ================= */
 
 app.delete(
-    '/api/admin/product/:id',
+    '/api/admin/order/:id',
     verifyAdmin,
     async (req, res) => {
 
-        await Product.findByIdAndDelete(
-
+        await Order.findByIdAndDelete(
             req.params.id
-
         );
 
         res.json({
-
             success: true
-
         });
 
     });
