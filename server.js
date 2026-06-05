@@ -20,9 +20,9 @@ app.use('/uploads', express.static('uploads'));
 
 mongoose.connect(process.env.MONGO_URL)
 
-.then(() => console.log("Database connected successfully!"))
+    .then(() => console.log("Database connected successfully!"))
 
-.catch(err => console.error("Database connection error:", err));
+    .catch(err => console.error("Database connection error:", err));
 
 /* ================= MULTER IMAGE UPLOAD ================= */
 
@@ -49,6 +49,25 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
+const ADMIN_PASSWORD = "StrongAdmin123";
+
+function verifyAdmin(req, res, next) {
+
+    const adminPassword = req.headers["admin-password"];
+
+    if (adminPassword !== ADMIN_PASSWORD) {
+
+        return res.status(401).json({
+            success: false,
+            message: "Unauthorized"
+        });
+
+    }
+
+    next();
+}
+
+
 
 /* ================= IMAGE UPLOAD API ================= */
 
@@ -352,7 +371,7 @@ app.get('/api/reviews', async (req, res) => {
 
     const reviews = await Review.find()
 
-    .sort({ createdAt: -1 });
+        .sort({ createdAt: -1 });
 
     res.json(reviews);
 
@@ -426,171 +445,189 @@ app.post('/api/admin/login', (req, res) => {
 
 /* ================= DASHBOARD ================= */
 
-app.get('/api/admin/dashboard-data', async (req, res) => {
+app.get(
+    '/api/admin/dashboard-data',
+    verifyAdmin,
+    async (req, res) => {
 
-    const products = await Product.find();
+        const products = await Product.find();
 
-    const orders = await Order.find();
+        const orders = await Order.find();
 
-    res.json({
+        res.json({
 
-        products,
+            products,
 
-        orders
-
-    });
-
-});
-
-/* ================= ADD PRODUCT ================= */
-
-app.post('/api/admin/add-product', async (req, res) => {
-
-    try {
-
-        let {
-
-            name,
-
-            price,
-
-            img,
-
-            category,
-
-            desc
-
-        } = req.body;
-
-        if (!price.includes('₹')) {
-
-            price = `₹${price}`;
-
-        }
-
-        const lastProduct = await Product.findOne({
-
-            category: category
-
-        }).sort({ id: -1 });
-
-        const newId = lastProduct
-
-        ? Number(lastProduct.id) + 1
-
-        : 1;
-
-        const newProduct = new Product({
-
-            id: newId,
-
-            name,
-
-            price,
-
-            img,
-
-            category,
-
-            desc
+            orders
 
         });
 
-        await newProduct.save();
+    });
 
-        res.status(201).json({
+/* ================= ADD PRODUCT ================= */
+
+app.post(
+    '/api/admin/add-product',
+    verifyAdmin,
+    async (req, res) => {
+
+        try {
+
+            let {
+
+                name,
+
+                price,
+
+                img,
+
+                category,
+
+                desc
+
+            } = req.body;
+
+            if (!price.includes('₹')) {
+
+                price = `₹${price}`;
+
+            }
+
+            const lastProduct = await Product.findOne({
+
+                category: category
+
+            }).sort({ id: -1 });
+
+            const newId = lastProduct
+
+                ? Number(lastProduct.id) + 1
+
+                : 1;
+
+            const newProduct = new Product({
+
+                id: newId,
+
+                name,
+
+                price,
+
+                img,
+
+                category,
+
+                desc
+
+            });
+
+            await newProduct.save();
+
+            res.status(201).json({
+
+                success: true
+
+            });
+
+        } catch (err) {
+
+            res.status(500).json({
+
+                error: err.message
+
+            });
+
+        }
+
+    });
+
+/* ================= EDIT PRODUCT ================= */
+
+app.put(
+    '/api/admin/product/:id',
+    verifyAdmin,
+    async (req, res) => {
+
+        await Product.findByIdAndUpdate(
+
+            req.params.id,
+
+            req.body
+
+        );
+
+        res.json({
 
             success: true
 
         });
 
-    } catch (err) {
-
-        res.status(500).json({
-
-            error: err.message
-
-        });
-
-    }
-
-});
-
-/* ================= EDIT PRODUCT ================= */
-
-app.put('/api/admin/product/:id', async (req, res) => {
-
-    await Product.findByIdAndUpdate(
-
-        req.params.id,
-
-        req.body
-
-    );
-
-    res.json({
-
-        success: true
-
     });
-
-});
 
 /* ================= DELETE PRODUCT ================= */
 
-app.delete('/api/admin/product/:id', async (req, res) => {
+app.delete(
+    '/api/admin/product/:id',
+    verifyAdmin,
+    async (req, res) => {
 
-    await Product.findByIdAndDelete(
+        await Product.findByIdAndDelete(
 
-        req.params.id
+            req.params.id
 
-    );
+        );
 
-    res.json({
+        res.json({
 
-        success: true
+            success: true
+
+        });
 
     });
-
-});
 
 /* ================= UPDATE ORDER ================= */
 
-app.put('/api/admin/order/:id', async (req, res) => {
+app.put(
+    '/api/admin/order/:id',
+    verifyAdmin,
+    async (req, res) => {
 
-    await Order.findByIdAndUpdate(
+        await Order.findByIdAndUpdate(
 
-        req.params.id,
+            req.params.id,
 
-        req.body
+            req.body
 
-    );
+        );
 
-    res.json({
+        res.json({
 
-        success: true
+            success: true
+
+        });
 
     });
-
-});
 
 /* ================= DELETE ORDER ================= */
 
-app.delete('/api/admin/order/:id', async (req, res) => {
+app.put(
+    '/api/admin/order/:id',
+    verifyAdmin,
+    async (req, res) => {
 
-    await Order.findByIdAndDelete(
+        await Order.findByIdAndDelete(
 
-        req.params.id
+            req.params.id
 
-    );
+        );
 
-    res.json({
+        res.json({
 
-        success: true
+            success: true
+
+        });
 
     });
-
-});
 
 /* ================= SIGNUP ================= */
 
