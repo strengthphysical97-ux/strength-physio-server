@@ -839,6 +839,20 @@ app.get('/api/my-orders/:email', async (req, res) => {
     }
 
 });
+app.get('/reset-admin', async (req, res) => {
+
+    const hash = await bcrypt.hash(
+        'Admin123',
+        10
+    );
+
+    await Admin.updateOne(
+        { username: 'admin' },
+        { $set: { password: hash } }
+    );
+
+    res.send('Password Reset Done');
+});
 
 /* ================= SERVER ================= */
 
