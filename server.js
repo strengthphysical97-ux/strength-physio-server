@@ -517,6 +517,7 @@ app.get(
 
 /* ================= ADD PRODUCT ================= */
 
+
 app.post(
     '/api/admin/add-product',
     verifyAdmin,
@@ -525,67 +526,53 @@ app.post(
         try {
 
             let {
-
                 name,
-
                 price,
-
                 img,
-
                 category,
-
                 desc
-
             } = req.body;
 
-            if (!price.includes('₹')) {
+            // Validation
+            if (!name || !price || !img) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Missing required fields"
+                });
+            }
 
+            // Safe price check
+            if (price && !price.includes('₹')) {
                 price = `₹${price}`;
-
             }
 
             const lastProduct = await Product.findOne({
-
                 category: category
-
             }).sort({ id: -1 });
 
             const newId = lastProduct
-
                 ? Number(lastProduct.id) + 1
-
                 : 1;
 
             const newProduct = new Product({
-
                 id: newId,
-
                 name,
-
                 price,
-
                 img,
-
                 category,
-
                 desc
-
             });
 
             await newProduct.save();
 
             res.status(201).json({
-
                 success: true
-
             });
 
         } catch (err) {
 
             res.status(500).json({
-
                 error: err.message
-
             });
 
         }
