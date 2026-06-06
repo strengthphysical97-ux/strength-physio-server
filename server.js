@@ -1,4 +1,6 @@
 require('dotenv').config();
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 // console.log(process.env.MONGO_URL);
 // mongoose.connect(process.env.MONGO_URL);
 
@@ -50,7 +52,7 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
-const ADMIN_PASSWORD = "StrongAdmin123";
+// const ADMIN_PASSWORD = "StrongAdmin123";
 
 function verifyAdmin(req, res, next) {
 
@@ -612,6 +614,20 @@ app.put(
         });
 
     });
+app.delete(
+    '/api/admin/product/:id',
+    verifyAdmin,
+    async (req, res) => {
+
+        await Product.findByIdAndDelete(
+            req.params.id
+        );
+
+        res.json({
+            success: true
+        });
+
+    });
 
 /* ================= DELETE PRODUCT ================= */
 
@@ -620,9 +636,7 @@ app.delete(
     verifyAdmin,
     async (req, res) => {
 
-        await Order.findByIdAndDelete(
-            req.params.id
-        );
+        await Order.findByIdAndDelete(req.params.id);
 
         res.json({
             success: true
